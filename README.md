@@ -1,56 +1,71 @@
-# Welcome to your Expo app 👋
+# 🐷 PiggyBank Play
 
-This is an [Expo](https://expo.dev) project created with [`create-expo-app`](https://www.npmjs.com/package/create-expo-app).
+Aplicación móvil de retos de ahorro personal: convierte una meta en un tablero de cuotas libres.
+El usuario elige qué cuota completar cuando tiene dinero; marcar una cuota **no recalcula** las demás.
 
-## Get started
+> *Tu meta. Tu ritmo. Tu juego.*
 
-1. Install dependencies
+## Stack
 
-   ```bash
-   npm install
-   ```
+- Expo SDK 58 + React Native + TypeScript estricto
+- Expo Router (rutas en `src/app/`)
+- Zustand (estado de UI), Zod (validación en fronteras)
+- Expo SQLite (persistencia local, offline-first)
+- Reanimated (animaciones), Expo Haptics, Expo Notifications
+- Jest + fast-check (pruebas unitarias y property-based)
 
-2. Start the app
-
-   ```bash
-   npx expo start
-   ```
-
-In the output, you'll find options to open the app in a
-
-- [development build](https://docs.expo.dev/develop/development-builds/introduction/)
-- [Android emulator](https://docs.expo.dev/workflow/android-studio-emulator/)
-- [iOS simulator](https://docs.expo.dev/workflow/ios-simulator/)
-- [Expo Go](https://expo.dev/go), a limited sandbox for trying out app development with Expo
-
-You can start developing by editing the files inside the **src/app** directory. This project uses [file-based routing](https://docs.expo.dev/router/introduction).
-
-## Get a fresh project
-
-When you're ready, run:
+## Comandos
 
 ```bash
-npm run reset-project
+npm install        # dependencias
+npx expo start     # servidor de desarrollo
+npm test           # pruebas
+npm run typecheck  # tsc --noEmit
+npm run lint       # eslint (expo lint)
+npx expo-doctor    # diagnóstico del proyecto
 ```
 
-This command will move the starter code to the **example** directory and create a blank **src/app** directory where you can start developing.
+## Estructura
 
-### Other setup steps
+```
+src/
+  app/                     # Rutas Expo Router (pantallas)
+  features/
+    challenges/
+      domain/              # Entidades, invariantes, generador de cuotas (sin RN ni SQLite)
+      application/         # Casos de uso: crear, completar, deshacer, resumir
+      presentation/        # Hooks, store del borrador y componentes de UI
+    settings/              # Preferencias del usuario (zustand)
+  infrastructure/
+    database/              # Migraciones y repositorio SQLite
+    notifications/         # Recordatorios locales opcionales
+    settings/              # Almacenamiento de preferencias (kv-store)
+  shared/                  # Tema, componentes de UI y utilidades (dinero, fechas, ids)
+```
 
-- To set up ESLint for linting, run `npx expo lint`, or follow our guide on ["Using ESLint and Prettier"](https://docs.expo.dev/guides/using-eslint/)
-- If you'd like to set up unit testing, follow our guide on ["Unit Testing with Jest"](https://docs.expo.dev/develop/unit-testing/)
-- Learn more about the TypeScript setup in this template in our guide on ["Using TypeScript"](https://docs.expo.dev/guides/typescript/)
+## Reglas de negocio (no negociables)
 
-## Learn more
+1. Las cuotas pertenecen al tablero, no al calendario.
+2. Marcar una cuota no recalcula las demás.
+3. Los importes son enteros en centavos y la suma es exacta (`count × min ≤ meta ≤ count × max`).
+4. Registrar y deshacer es transaccional e idempotente por `operationId`.
+5. El dominio no depende de React Native ni de SQLite.
+6. La app registra ahorros manualmente: no custodia ni transfiere dinero.
 
-To learn more about developing your project with Expo, look at the following resources:
+Arquitectura completa en [`ARQUITECTURA.md`](./ARQUITECTURA.md) e instrucciones para agentes en [`AGENTS.md`](./AGENTS.md) con skills en `.agents/skills/`.
 
-- [Expo documentation](https://docs.expo.dev/): Learn fundamentals, or go into advanced topics with our [guides](https://docs.expo.dev/guides).
-- [Learn Expo tutorial](https://docs.expo.dev/tutorial/introduction/): Follow a step-by-step tutorial where you'll create a project that runs on Android, iOS, and the web.
+## Recorrido MVP
 
-## Join the community
+Bienvenida → Inicio → Crear reto (presets Relax/Normal/Turbo/Personalizado) → Vista previa y
+regeneración de cuotas → Tablero (confirmar ahorro / deshacer) → Historial → Ajustes
+(moneda, recordatorios, accesibilidad, privacidad).
 
-Join our community of developers creating universal apps.
+## Roadmap
 
-- [Expo on GitHub](https://github.com/expo/expo): View our open source platform and contribute.
-- [Discord community](https://chat.expo.dev): Chat with Expo users and ask questions.
+- **MVP:** lo anterior, con persistencia local y funcionamiento sin conexión.
+- **1.1:** accesorios, temas, insignias, estadísticas y múltiples monedas por reto.
+- **2:** retos compartidos opcionales y sincronización con consentimiento.
+
+## Nota
+
+El nombre *PiggyBank Play* está pendiente de verificación comercial antes de publicar.
